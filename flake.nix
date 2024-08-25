@@ -26,6 +26,15 @@
 	  postgresql
 	];
       };
+
+      nixosConfigurations = {
+	server = nixpkgs.lib.nixosSystem {
+	  system = system;
+	  modules = [
+	    ./configuration.nix 
+	  ];
+	};
+      };
     }
   );
 }
