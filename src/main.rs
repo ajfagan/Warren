@@ -3,6 +3,10 @@ extern crate diesel;
 pub mod schema;
 pub mod models;
 
+pub mod devices;
+
+pub mod cli_parser;
+
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use dotenvy::dotenv;
@@ -13,6 +17,11 @@ use actix_web::{HttpServer, App, web, HttpResponse, Responder};
 use tera::{Tera, Context};
 use serde::{Serialize, Deserialize};
 use actix_identity::{Identity, CookieIdentityPolicy, IdentityService};
+
+pub trait WarrenRunner {
+    fn init(&self) -> std::io::Result<()>;
+    fn run(&self) -> std::io::Result<()>;
+}
 
 async fn login(tera: web::Data<Tera>, id: Identity) -> impl Responder {
     let mut data = Context::new();
@@ -78,8 +87,12 @@ async fn process_signup(data: web::Form<NewUser>) -> impl Responder {
     HttpResponse::Ok().body(format!("Successfully saved user: {}", data.username))
 }
 
+fn main() -> std::io::Result<()> {
+    cli_parser::parse_cli()
+}
+
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn boot_server() -> std::io::Result<()> {
     HttpServer::new( || {
         let tera = Tera::new("templates/**/*").unwrap();
         App::new()
@@ -117,4 +130,3 @@ async fn signup(tera: web::Data<Tera>) -> impl Responder {
     let rendered = tera.render("signup.html", &data).unwrap();
     HttpResponse::Ok().body(rendered)
 }
-

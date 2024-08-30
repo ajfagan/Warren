@@ -6,35 +6,47 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }: 
-  flake-utils.lib.eachDefaultSystem 
-  (system:
-    let
-      pkgs = import nixpkgs {
-	inherit system;
-      };
-      dc = pkgs.diesel-cli.override {
-	sqliteSupport = false;
-	mysqlSupport = false;
-      };
-    in 
-    {
-      devShells.default = nixpkgs.legacyPackages.${system}.mkShell {
-	nativeBuildInputs = with pkgs; [ 
-	  rustup 
-	  dc
-	  postgresql
-	];
-      };
+  outputs = { self, nixpkgs, flake-utils, ... }@attrs: 
+    flake-utils.lib.eachDefaultSystem (system: 
+      let
+	pkgs = nixpkgs.legacyPackages.${system};
+	dc = pkgs.diesel-cli.override {
+	  sqliteSupport = false;
+	  mysqlSupport = false;
+	};
+	warren = pkgs.writeShellApplication {
+	  name = "warren";
 
-      nixosConfigurations = {
-	server = nixpkgs.lib.nixosSystem {
-	  system = system;
-	  modules = [
-	    ./configuration.nix 
+	  runtimeInputs = with pkgs; [ 
+	    rustup
+	    dc
+	    postgresql
+	  ];
+
+	  text = (builtins.readFile ./warren.sh);
+	};
+      in 
+      {
+	devShells.default = pkgs.mkShell {
+	  nativeBuildInputs = with pkgs; [ 
+	    rustup 
+	    dc
+	    postgresql
+	    warren
 	  ];
 	};
+
+	nixosConfigurations = {
+	  server = {
+	    default = attrs.nixpkgs.lib.nixosSystem {
+	      inherit system;
+	      specialArgs = { inherit attrs; };
+	      modules = [
+		./configuration.nix 
+	      ];
+	    };
+	  };
+	};
       };
-    }
-  );
+    );
 }
