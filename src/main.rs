@@ -94,7 +94,7 @@ fn main() -> std::io::Result<()> {
 #[actix_web::main]
 async fn boot_server() -> std::io::Result<()> {
     HttpServer::new( || {
-        let tera = Tera::new("templates/**/*").unwrap();
+        let tera = Tera::new("templates/**/*.html").unwrap();
         App::new()
             .wrap(IdentityService::new(
                     CookieIdentityPolicy::new(&[0;32])
@@ -108,11 +108,13 @@ async fn boot_server() -> std::io::Result<()> {
             .route("/login", web::get().to(login))
             .route("/login", web::post().to(process_login))
             .route("/logout", web::to(logout))
+            .service(actix_files::Files::new("/styles", "./templates/styles").show_files_listing())
+            .service(actix_files::Files::new("/images", "./templates/images").show_files_listing())
     })
     .bind("127.0.0.1:8000")?
     .run()
     .await
-}
+} 
 
 async fn index(tera: web::Data<Tera>) -> impl Responder {
     let mut data = Context::new();

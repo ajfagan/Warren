@@ -1,0 +1,93 @@
+:root {
+  --UranusBlue: #1E3A5F;
+  --SoftTeal: #3B6978;
+  --DeepPurple: #5D3A9B;
+
+  --Cyan: #00FFFF;
+  --Magenta: #FF00FF;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg, var(--UranusBlue), #222222);
+  color: #E0E0E0;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3 {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--Cyan);
+  text-shadow: 0 0 10px var(--Cyan);
+}
+
+a {
+  color: var(--DeepPurple);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--Magenta);
+}
+
+.container {
+  width: 100%;
+  padding: 20px;
+}
+
+.glow-button {
+  background-color: var(--SoftTeal);
+  border: none;
+  padding: 15px 30px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  font-weight: bold;
+  border-radius: 30px;
+  box-shadow: 0 0 20px var(--Cyan);
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-button:hover {
+  box-shadow: 0 0 30px var(--Magenta);
+}
+
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 24px;
+  }
+  .container {
+    padding: 10px;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.025); }
+  50% { transform: scale(1.05); }
+  75% { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+
+.logo {
+  width: 150px; /* Adjust the size as needed */
+  height: auto;
+  display: inline-block; 
+  margin-right: 20px;
+}
+.logo-footer {
+    width: 100px;
+    height: auto;
+    display: inline-block;
+    margin-top: 10px;
+}
+.logo:hover {
+    filter: drop-shadow(0 0 20px #FF00FF); /* Intensify glow on hover */
+    animation: pulse 2s infinite ease-in-out;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+}
