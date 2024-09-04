@@ -4,9 +4,13 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+	home-manager = {
+		url = "github:nix-community/home-manager";
+		inputs.nixpkgs.follows = "nixpkgs";
+	};
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }@attrs: 
+  outputs = { self, nixpkgs, flake-utils, home-manager, ... }@attrs: 
     flake-utils.lib.eachDefaultSystem (system: 
       let
 	pkgs = nixpkgs.legacyPackages.${system};
@@ -14,27 +18,8 @@
 	  sqliteSupport = false;
 	  mysqlSupport = false;
 	};
-	warren = pkgs.writeShellApplication {
-	  name = "warren";
-
-	  runtimeInputs = with pkgs; [ 
-	    rustup
-	    dc
-	    postgresql
-	  ];
-
-	  text = (builtins.readFile ./warren.sh);
-	};
       in 
       {
-	devShells.default = pkgs.mkShell {
-	  nativeBuildInputs = with pkgs; [ 
-	    rustup 
-	    dc
-	    postgresql
-	    warren
-	  ];
-	};
 
 	nixosConfigurations = {
 	  server = {
@@ -42,11 +27,16 @@
 	      inherit system;
 	      specialArgs = { inherit attrs; };
 	      modules = [
-		./configuration.nix 
+			./configuration.nix 
+			home-manager.nixosModules.home-manager {
+				home-manager.useGlobalPkgs = true;
+				home-manager.useUserPackages = true;
+				home-manager.users.warren = import ./warren-server/warren.nix;
+			}
 	      ];
 	    };
 	  };
 	};
-      };
+      }
     );
 }
